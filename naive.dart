@@ -9,7 +9,7 @@ class Result {
     path = new PList();
     cost = double.INFINITY;
   }
-
+  bool get valid => cost < double.INFINITY;
   String toString() => "Cost: $cost, path: $path";
 }
 
