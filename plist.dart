@@ -3,6 +3,7 @@ class PList<T> {
   bool get empty => true;
   String toString() => "[]";
   PList<T> cons(T hd) => new PCons(hd, this);
+  bool any(pred) => false;
 }
 
 class PCons<T> extends PList<T> {
@@ -12,6 +13,10 @@ class PCons<T> extends PList<T> {
   T get hd => this._hd;
   PList<T> get tl => this._tl;
   bool get empty => false;
+
+  bool any(pred) {
+    return pred(_hd) || _tl.any(pred);
+  }
 
   String toString() {
     var str = new StringBuffer("[");
