@@ -43,21 +43,21 @@ abstract class Graph {
   Node get end => _nodes[_nodes.length - 1];
 
   // Edge related interface
-  void addEdge(int i, int j, num cost);
+  void _addEdge(int i, int j, num cost);
   PList<Edge> adjacent(Node n);
 
   // Some predefined graphs
   factory Graph.AU() {
     return new GraphList(7)
-        ..addEdge(0, 1, 500)
-        ..addEdge(0, 2, 400)
-        ..addEdge(1, 3, 200)
-        ..addEdge(1, 5, 400)
-        ..addEdge(2, 3, 100)
-        ..addEdge(2, 4, 150)
-        ..addEdge(3, 4, 100)
-        ..addEdge(4, 5, 150)
-        ..addEdge(5, 6, 100);
+        .._addEdge(0, 1, 500)
+        .._addEdge(0, 2, 400)
+        .._addEdge(1, 3, 200)
+        .._addEdge(1, 5, 400)
+        .._addEdge(2, 3, 100)
+        .._addEdge(2, 4, 150)
+        .._addEdge(3, 4, 100)
+        .._addEdge(4, 5, 150)
+        .._addEdge(5, 6, 100);
   }
 }
 
@@ -80,7 +80,7 @@ class GraphMatrix extends Graph {
   }
 
   // Assumes i different from j. Writes the cost into the matrix.
-  void addEdge(num i, num j, num cost) {
+  void _addEdge(num i, num j, num cost) {
     var minI = min(i, j);
     var maxI = max(i, j);
     _edges[_offset(maxI) + minI] = cost;
@@ -125,7 +125,7 @@ class GraphList extends Graph {
 
   // Assumes the edge is not already present. An edge is added in the
   // adjacency lists of both nodes since the graph is undirected.
-  void addEdge(num i, num j, num cost) {
+  void _addEdge(num i, num j, num cost) {
     _edges[i] = _edges[i].cons(new Edge(_nodes[j], cost));
     _edges[j] = _edges[j].cons(new Edge(_nodes[i], cost));
   }
