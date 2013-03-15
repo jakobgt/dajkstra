@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Shortest Path</title>
+    <script language="javascript" type="text/javascript" src="shortest-path.js"></script>
+    <style type="text/css">
+    </style>
+</head>
+<body onload="init();">
+<h2>An illustration of <a
+        href="http://en.wikipedia.org/wiki/Shortest_path_problem">the
+    shortest-path problem</a></h2>
+<p>
+    This tool illustrates finding the shortest path in a graph in two ways:
+<ul>
+    <li>The <em>naive</em> strategy enumerates all possible paths from the initial node (in green) to the final node (in red).</li>
+    <li>The <em>Dijkstra</em> strategy incrementally builds a tree of shortest-paths from the initial node (in green) using <a href="http://en.wikipedia.org/wiki/Dijkstra's_algorithm"> Dijkstra's shortest-path algorithm</a>.</li>
+</ul>
+The naive strategy might appear reasonable but it does not scale. Use
+the <em>Hard Map</em> button to get a map with many paths and compare
+the naive enumeration to Dijkstra's solution.
+<p>
+    The code requires HTML Canvas support in your browser. If it does not
+    work, try using the Google Chrome browser with which the code has been
+    tested.
+</p>
+<hr/>
+<input id="btn_reset" onclick="reset();" type="button" value="Reset Map"/>
+&mdash;
+<input id="btn_new_map" onclick="new_map();" type="button" value="New Map"/>
+<input id="btn_easy_map" onclick="find_easy_map();" type="button" value="Easy Map"/>
+<input id="btn_hard_map" onclick="find_hard_map();" type="button" value="Hard Map"/>
+&mdash;
+<input id="btn_naive_step" onclick="naive_step();" type="button" value="Step Naive"/>
+<input id="btn_naive_run" onclick="naive_run();" type="button" value="Run Naive"/>
+&mdash;
+<input id="btn_dijkstra_step" onclick="dijkstra_step();" type="button" value="Step Dijkstra"/>
+<input id="btn_dijkstra_run" onclick="dijkstra_run();" type="button" value="Run Dijkstra"/>
+<hr/>
+<canvas id="map"></canvas>
+<hr/>
+<p>
+    <strong>Disclaimer:</strong> A visualization step does not accurately
+    reflect a <em>computational step</em> of the algorithm.  While the
+    depiction of the naive enumeration is inaccurate to the actual search
+    through the tree of possible paths (i.e., the naive search does share
+    path prefixes) it does illustrate the potential size of the search
+    space. The visualization of Dijkstra's shortest-path algorithm shows a
+    single step as the assignment of costs to nodes adjacent to the
+    current minimal-cost node.  However, there are several computational
+    steps in order to find this minimal-cost node.
+</p>
+</body>
+</html>
