@@ -14,7 +14,10 @@ class Result {
 }
 
 class NaiveAlgorithm {
-  Result findShortestPath(Graph graph) {
+  var _onPath, _onCycle;
+  Result findShortestPath(Graph graph, {onPath: null, onCycle: null}) {
+    _onPath = (onPath != null) ? onPath : (_) {};
+    _onCycle = (onCycle != null) ? onCycle : (_) {};
     return _findFromCurrentNode(graph.start, new PList(), 0, graph);
   }
 
@@ -24,9 +27,11 @@ class NaiveAlgorithm {
                               Graph graph) {
     var currentFullPath = currentPath.cons(currentNode);
     if (currentNode.id == graph.end.id) {
+      _onPath(currentFullPath);
       return new Result(currentFullPath, currentCost);
     }
     if (currentPath.any((elm) => elm.id == currentNode.id)) {
+      _onCycle(currentFullPath);
       return new Result.NoPath();
     }
     visit(PList<Edge> edges, Result bestRes) {
