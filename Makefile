@@ -9,6 +9,5 @@ $(VISUALIZER): $(VISUALIZER).js
 $(VISUALIZER).js: $(FILES)
 	$(DART2JS) $(VISUALIZER).dart --minify -c -p. -o$(VISUALIZER).js
 
-
 default:
 	$(DART) --checked $(MAIN).dart
