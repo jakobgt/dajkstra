@@ -1,5 +1,4 @@
-import "plist.dart";
-import "dart:math";
+part of dajkstra;
 
 /**
  * Representation of an edge to a destination node "dest" with an

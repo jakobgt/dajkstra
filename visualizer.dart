@@ -1,7 +1,10 @@
-import 'dart:html';
+//import 'dart:html';
+import 'dajkstra.dart';
 
 void main() {
-  //var shortestPath = new ShortestPath(query("#map"));
+  print("Running main");
+  var graphGenerator = new GraphGenerator("");
+  graphGenerator.draw();
 
 //  shortestPath.
 

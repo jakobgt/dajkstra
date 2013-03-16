@@ -1,6 +1,4 @@
-import "graph.dart";
-import "plist.dart";
-import "naive-automaton.dart";
+import 'package:dajkstra';
 
 void main() {
   Graph g = new Graph.AU();

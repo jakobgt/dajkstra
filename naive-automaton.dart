@@ -1,5 +1,4 @@
-import "graph.dart";
-import "plist.dart";
+part of dajkstra;
 
 /**
  * A state transition implementation of the naive search for a
@@ -7,7 +6,7 @@ import "plist.dart";
  * recursive descent search implemented in "naive.dart" using the
  * "functional correspondence" (Ager et al., PPDP'03).
  */
-class NaiveAlgorithm {
+class NaiveAutomaton {
 
   Result findShortestPath(Graph graph) {
     return run(new NodeState(graph.start,
@@ -27,18 +26,6 @@ class NaiveAlgorithm {
     return state.result;
   }
 
-}
-
-class Result {
-  PList<Node> path;
-  num cost;
-  Result(PList<Node> this.path, num this.cost);
-  Result.NoPath() {
-    path = new PList();
-    cost = double.INFINITY;
-  }
-  bool get valid => cost < double.INFINITY;
-  String toString() => "Cost: $cost, path: $path";
 }
 
 abstract class State {

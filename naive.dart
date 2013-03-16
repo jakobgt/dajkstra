@@ -1,5 +1,4 @@
-import 'graph.dart';
-import 'plist.dart';
+part of dajkstra;
 
 class Result {
   PList<Node> path;

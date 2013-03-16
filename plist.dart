@@ -1,3 +1,5 @@
+part of dajkstra;
+
 /**
  * Persistent/immutable singly linked list. The base case, ie, the
  * empty list is defined by PList and PCons implements a link in a

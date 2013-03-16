@@ -3,11 +3,12 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Shortest Path</title>
-    <script language="javascript" type="text/javascript" src="shortest-path.js"></script>
+    <!--<script language="javascript" type="text/javascript" src="visualizer.js"></script>-->
+    <script type="application/dart" src="visualizer.dart"></script>
     <style type="text/css">
     </style>
 </head>
-<body onload="init();">
+<body>
 <h2>An illustration of <a
         href="http://en.wikipedia.org/wiki/Shortest_path_problem">the
     shortest-path problem</a></h2>
@@ -26,17 +27,17 @@ the naive enumeration to Dijkstra's solution.
     tested.
 </p>
 <hr/>
-<input id="btn_reset" onclick="reset();" type="button" value="Reset Map"/>
+<input id="btn_reset" type="button" value="Reset Map"/>
 &mdash;
-<input id="btn_new_map" onclick="new_map();" type="button" value="New Map"/>
-<input id="btn_easy_map" onclick="find_easy_map();" type="button" value="Easy Map"/>
-<input id="btn_hard_map" onclick="find_hard_map();" type="button" value="Hard Map"/>
+<input id="btn_new_map" type="button" value="New Map"/>
+<input id="btn_easy_map" type="button" value="Easy Map"/>
+<input id="btn_hard_map" type="button" value="Hard Map"/>
 &mdash;
-<input id="btn_naive_step" onclick="naive_step();" type="button" value="Step Naive"/>
-<input id="btn_naive_run" onclick="naive_run();" type="button" value="Run Naive"/>
+<input id="btn_naive_step" type="button" value="Step Naive"/>
+<input id="btn_naive_run" type="button" value="Run Naive"/>
 &mdash;
-<input id="btn_dijkstra_step" onclick="dijkstra_step();" type="button" value="Step Dijkstra"/>
-<input id="btn_dijkstra_run" onclick="dijkstra_run();" type="button" value="Run Dijkstra"/>
+<input id="btn_dijkstra_step" type="button" value="Step Dijkstra"/>
+<input id="btn_dijkstra_run" type="button" value="Run Dijkstra"/>
 <hr/>
 <canvas id="map"></canvas>
 <hr/>
