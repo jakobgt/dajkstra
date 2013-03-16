@@ -14,4 +14,4 @@ $(VISUALIZER).js: $(FILES) build-dir
 	$(DART2JS) $(VISUALIZER).dart --minify -c -p. -o$(BUILD)/$(VISUALIZER).js
 
 default:
-	$(DART) --checked $(MAIN).dart
+	$(DART) --checked --package-root=./ $(MAIN).dart

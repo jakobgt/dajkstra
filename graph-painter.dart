@@ -1,4 +1,7 @@
-part of dajkstra;
+/**
+* File for painting the graph.
+*/
+
 
 // Parameters.
 var scale = 1;
@@ -14,22 +17,25 @@ var map_height = cell_height * ymax;
 var show_dist = false;
 var run_speed = 100;
 
-class GraphGenerator {
+
+class GraphPainter {
   var _canvasElement;
 
-  GraphGenerator(this._canvasElement) {
+  GraphPainter(this._canvasElement) {
 
   }
 
-  void draw() {
+  void paint(X) {
 //    context = _canvasElement.context2d();
 //    context.width = map_width;
 //    context.height = map_width;
+
   }
 
 }
 
-         /*
+
+/*
 var canvas = document.getElementById("map");
 ctx = canvas.getContext("2d");
 canvas.style.width = map_width + "px";

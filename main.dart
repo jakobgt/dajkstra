@@ -1,4 +1,8 @@
-import 'package:dajkstra';
+import 'package:dajkstra/dajkstra.dart';
+
+/*
+ Main file for running the algorithms from the command line.
+ */
 
 void main() {
   Graph g = new Graph.AU();
@@ -8,4 +12,6 @@ void main() {
   var pathCount = 0;
   print(new NaiveAlgorithm().findShortestPath(g/*, onPath : (p) => pathCount++*/));
   print("path count: $pathCount");
+
+  GraphGenerator gen = new GraphGenerator();
 }
