@@ -1,3 +1,4 @@
 .idea/
 dajkstra.iml
 visualizer.js*
+build/
