@@ -43,6 +43,14 @@ class PList<T> {
     str.write("]");
     return str.toString();
   }
+
+  factory PList.fromDList(List<T> list) {
+    PList<T> pList = new PList();
+    for(int i = list.length -1; i >= 0; --i) {
+      pList = pList.cons(list[i]);
+    }
+    return pList;
+  }
 }
 
 /**

@@ -41,6 +41,7 @@ abstract class Graph {
   }
   Node get start => _nodes[0];
   Node get end => _nodes[_nodes.length - 1];
+  PList<Node> get nodes => new PList.fromDList(_nodes);
 
   // Edge related interface
   void _addEdge(int i, int j, num cost);
@@ -69,6 +70,8 @@ abstract class Graph {
     }
     return graph;
   }
+
+
 }
 
 /**

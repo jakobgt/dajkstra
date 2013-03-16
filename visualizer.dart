@@ -14,7 +14,7 @@ void main() {
   print("Running main");
   GraphGenerator graphGenerator = new GraphGenerator();
   DisplayableGraph graph = graphGenerator.generateGraph(node_count, xmax, ymax);
-
+  print(graph.graph.nodes);
 
 //  var graphPainter = new GraphPainter();
 //  graphGenerator.draw();

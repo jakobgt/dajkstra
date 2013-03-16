@@ -7,7 +7,7 @@ class EucNode implements Comparable<EucNode> {
   num _y;
   EucNode(this._x, this._y) {  }
 
-  String toString() =>  "($_x,$_y)";
+  String toString() =>  "($_x, $_y)";
   bool operator ==(EucNode other) =>  _x == other._x && _y == other._y;
   bool operator <(EucNode other) => (_x < other._x) ||
                                     (_x == other._x && _y < other._y);
