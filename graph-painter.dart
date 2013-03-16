@@ -1,7 +1,7 @@
 /**
 * File for painting the graph.
 */
-
+import "dart:html";
 
 // Parameters.
 var scale = 1;
@@ -19,10 +19,10 @@ var run_speed = 100;
 
 
 class GraphPainter {
-  var _canvasElement;
+  CanvasElement _canvasElement;
 
   GraphPainter(this._canvasElement) {
-
+    List s;
   }
 
   void paint(X) {

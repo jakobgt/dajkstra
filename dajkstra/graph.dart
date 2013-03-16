@@ -4,11 +4,12 @@ part of dajkstra;
  * Representation of an edge to a destination node "dest" with an
  * associated cost "cost".
  */
-class Edge {
-  Node dest;
+class Edge<T> {
+  T src;
+  T dest;
   num cost;
-  Edge(this.dest, this.cost);
-  String toString() => "($dest, $cost)";
+  Edge(T this.src, T this.dest, num this.cost);
+  String toString() => "($src -> $dest: $cost)";
 }
 
 /**
@@ -43,7 +44,7 @@ abstract class Graph {
 
   // Edge related interface
   void _addEdge(int i, int j, num cost);
-  PList<Edge> adjacent(Node n);
+  PList<Edge<Node>> adjacent(Node n);
 
   // Some predefined graphs
   factory Graph.AU() {
@@ -57,6 +58,16 @@ abstract class Graph {
         .._addEdge(3, 4, 100)
         .._addEdge(4, 5, 150)
         .._addEdge(5, 6, 100);
+  }
+
+  factory Graph.fromList(num nodeCount, PList<Edge<num>> edges) {
+    var graph = new GraphList(nodeCount);
+    while(!edges.empty) {
+      Edge<num> edge = edges.hd;
+      graph._addEdge(edge.src, edge.dest, edge.cost);
+      edges = edges.tl;
+    }
+    return graph;
   }
 }
 
@@ -85,14 +96,14 @@ class GraphMatrix extends Graph {
     _edges[_offset(maxI) + minI] = cost;
   }
 
-  PList<Edge> adjacent(Node n) {
-    PList<Edge> ns = new PList();
+  PList<Edge<Node>> adjacent(Node n) {
+    PList<Edge<Node>> ns = new PList();
     num offset = _offset(n.id);
     // Find edges to previous nodes in the nodes own column
     for (num i = 0; i < n.id; ++i) {
       num cost = _edges[offset + i];
       if (cost > 0) {
-        ns = ns.cons(new Edge(_nodes[i], cost));
+        ns = ns.cons(new Edge(n, _nodes[i], cost));
       }
     }
     // Find edges to subsequent nodes in the node row of subsequent
@@ -100,7 +111,7 @@ class GraphMatrix extends Graph {
     for (num i = n.id + 1; i < _nodes.length; ++i) {
       num cost = _edges[_offset(i) + n.id];
       if (cost > 0) {
-        ns = ns.cons(new Edge(_nodes[i], cost));
+        ns = ns.cons(new Edge(n, _nodes[i], cost));
       }
     }
     return ns;
@@ -125,9 +136,10 @@ class GraphList extends Graph {
   // Assumes the edge is not already present. An edge is added in the
   // adjacency lists of both nodes since the graph is undirected.
   void _addEdge(num i, num j, num cost) {
-    _edges[i] = _edges[i].cons(new Edge(_nodes[j], cost));
-    _edges[j] = _edges[j].cons(new Edge(_nodes[i], cost));
+    _edges[i] = _edges[i].cons(new Edge(_nodes[i], _nodes[j], cost));
+    _edges[j] = _edges[j].cons(new Edge(_nodes[j], _nodes[i], cost));
   }
 
   PList<Edge> adjacent(Node n) => _edges[n.id];
+  String toString() => "GraphList: $_nodes and $_edges";
 }

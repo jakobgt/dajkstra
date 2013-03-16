@@ -12,8 +12,8 @@ var ymax = 12 * scale;
 
 void main() {
   print("Running main");
-  var graphGenerator = new GraphGenerator();
-  var graph = graphGenerator.generateGraph(node_count, xmax, ymax);
+  GraphGenerator graphGenerator = new GraphGenerator();
+  DisplayableGraph graph = graphGenerator.generateGraph(node_count, xmax, ymax);
 
 
 //  var graphPainter = new GraphPainter();
