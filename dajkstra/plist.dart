@@ -44,6 +44,10 @@ class PList<T> {
     return str.toString();
   }
 
+  PList<dynamic> map(dynamic fn(T elm)) {
+    return new PList();
+  }
+
   factory PList.fromDList(List<T> list) {
     PList<T> pList = new PList();
     for(int i = list.length -1; i >= 0; --i) {
@@ -63,4 +67,8 @@ class PCons<T> extends PList<T> {
   T get hd => this._hd;
   PList<T> get tl => this._tl;
   bool get empty => false;
+
+  PList<dynamic> map(dynamic fn(T elm)) {
+    return _tl.map(fn).cons(fn(_hd));
+  }
 }

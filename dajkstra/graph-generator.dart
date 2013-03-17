@@ -2,7 +2,6 @@ part of dajkstra;
 
 // An euclidean node is a point on the plane with natural-number coordinates.
 class EucNode implements Comparable<EucNode> {
-  num _id = -1; // Will be set after sorting.
   num _x;
   num _y;
   EucNode(this._x, this._y) {  }
@@ -20,13 +19,14 @@ class EucNode implements Comparable<EucNode> {
     var n = pow(p2._x - p1._x, 2) + pow(p2._y - p1._y, 2);
     return t.abs() / sqrt(n);
   }
-  num get id => _id;
-  set id(num value) => _id = value;
+  num get x => _x;
+  num get y => _y;
 }
 
+typedef EucNode ConvertIdToEucNode(num id);
 class DisplayableGraph {
   Graph graph;
-  Function euclidNodeFromId;
+  ConvertIdToEucNode euclidNodeFromId;
   DisplayableGraph(this.graph, this.euclidNodeFromId);
 }
 
@@ -62,13 +62,10 @@ class GraphGenerator {
   List<EucNode> uniq(List<EucNode> nodes) {
     assert(!nodes.isEmpty);
     List<EucNode> result = [nodes[0]];
-    int j = 0;
     for(int i = 1; i < nodes.length; i++) {
       EucNode node = nodes[i];
-      if (result[j] < node) {
+      if (result[result.length - 1] < node) {
         result.add(node);
-        node.id = j;
-        j++;
       }
     }
     return result;
@@ -90,8 +87,6 @@ class GraphGenerator {
     // Add short paths while the graph remains unconnected.
     while (!_isConnected(nodes, edges))
       _connectGroup(nodes, edges);
-    // Reset the node colors.
-    //nodes.forEach(function (node) { node.initialize(); });
     return edges;
   }
 
@@ -169,9 +164,4 @@ class GraphGenerator {
       }
     }
   }
-
-
-
-
 }
-

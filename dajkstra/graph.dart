@@ -31,6 +31,7 @@ class Node {
  */
 abstract class Graph {
   List<Node> _nodes;
+  num get nodeCount => _nodes.length;
 
   Graph(int node_count) {
     // Initialize nodes
@@ -70,8 +71,6 @@ abstract class Graph {
     }
     return graph;
   }
-
-
 }
 
 /**
