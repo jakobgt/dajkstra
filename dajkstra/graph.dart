@@ -10,6 +10,7 @@ class Edge<T> {
   num cost;
   Edge(T this.src, T this.dest, num this.cost);
   String toString() => "($src -> $dest: $cost)";
+  bool operator ==(Edge<T> other) => src == other.src && dest == other.dest && cost == other.cost;
 }
 
 /**
@@ -22,6 +23,7 @@ class Node {
   Node(num this._id);
   num get id => _id;
   String toString() => "n$_id";
+  bool operator ==(Node other) => id == other.id;
 }
 
 /**

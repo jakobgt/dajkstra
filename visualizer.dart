@@ -15,8 +15,8 @@ var mapWidthMax = 900 * scale;
 var mapHeightMax = 600 * scale;
 var runSpeed = 100;
 
-const easyGraph = 3;
-const hardGraph = 100;
+const easyGraph = 1;
+const hardGraph = 30;
 
 void main() {
   print("Running main");
@@ -81,6 +81,21 @@ class ShortestPathDriver {
     }
   }
 
+  PList<PList<Edge>> _extractEdgesToDo(Context cont) {
+    if (cont is EmptyContext) {
+      return new PList();
+    } else {
+      return _extractEdgesToDo(cont.cont).cons(cont.edges);
+    }
+  }
+
+  PList flatten(PList<PList> list) {
+    if (list.empty) return new PList();
+    else {
+      return list.hd.foldr((e, acc) => acc.cons(e), flatten(list.tl));
+    }
+  }
+
   PList<Node> _extractCycle(PList<Node> cycle) {
     Node head = cycle.hd;
     PList<Node> visit(PList<Node> cycle) {
@@ -103,22 +118,29 @@ class ShortestPathDriver {
     PList<Node> currentPath = new PList();
     PList<Node> cycle = new PList();
     PList<Node> endPath = new PList();
+    Context context = new EmptyContext();
     if (_state is CycleState) {
+      context = (_state as CycleState).cont.cont;
       currentPath = (_state as CycleState).cyclePath;
       cycle = _extractCycle(currentPath);
     } else if (_state is PathState) {
+      context = (_state as PathState).cont.cont;
       currentPath = (_state as PathState).cont.result.path;
       endPath = currentPath;
     } else if (_state is FinalState) {
       currentPath = (_state as FinalState).result.path;
       endPath = currentPath;
     } else if (_state is NodeState) {
+      context = (_state as NodeState).cont;
       currentPath = (_state as NodeState).currentPath.cons((_state as NodeState).currentNode);
     } else if (_state is EdgesState) {
+      context = (_state as EdgesState).cont;
       currentPath = (_state as EdgesState).currentFullPath;
     } else if (_state is ContState) {
+      context = (_state as ContState).cont;
       currentPath = _extractPath((_state as ContState).cont);
     }
+    PList<Edge> todoEdges = flatten(_extractEdgesToDo(context));
 
     bool visit(PList<Node> path, Node src, Node dst) {
       if (path.empty) return false;
@@ -127,12 +149,18 @@ class ShortestPathDriver {
           path.hd == src && !path.tl.empty && path.tl.hd == dst) return true;
       else return visit(path.tl, src, dst);
     }
+    bool visitEdges(PList<Edge> edges, Node src, Node dst) {
+      return edges.any((Edge otherE) => otherE.src == src && otherE.dest == dst ||
+                                        otherE.src == dst && otherE.dest == src);
+    }
+
     _graphPainter.drawPath(_graph,
         edgeColorFn: (Node src, Node dst) =>
         (visit(cycle, src, dst))
           ? "red" : (visit(endPath, src, dst))
-            ? "lightgreen" : (visit(currentPath, src, dst))
-              ? "blue" : "gray",
+            ? "green" : (visit(currentPath, src, dst))
+              ? "blue" : (visitEdges(todoEdges, src, dst))
+                ? "gray" : "lightgray",
         nodeColorFn: (Node n) =>
         (currentPath.any((Node other) => n.id == other.id))? "white": "gray");
     print(currentPath);
