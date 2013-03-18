@@ -127,11 +127,13 @@ class ContState extends State {
 
 abstract class Context {
   State apply(Result result);
+  dynamic foldr(dynamic fn(EdgesContext, dynamic), dynamic acc);
 }
 
 class EmptyContext extends Context {
   State apply(Result result) => new FinalState(result);
   String toString() => "EMPTY";
+  dynamic foldr(dynamic fn(EdgesContext, dynamic), dynamic acc) => acc;
 }
 
 class EdgesContext extends Context {
@@ -155,4 +157,5 @@ class EdgesContext extends Context {
                      graph,
                      cont);
   String toString() => "NON-EMPTY";
+  dynamic foldr(dynamic fn(EdgesContext, dynamic), dynamic acc) => fn(this, cont.foldr(fn, acc));
 }

@@ -119,16 +119,21 @@ class ShortestPathDriver {
     PList<Node> cycle = new PList();
     PList<Node> endPath = new PList();
     Context context = new EmptyContext();
+    Map<Node, num> nodeCosts = new Map();
     if (_state is CycleState) {
       context = (_state as CycleState).cont.cont;
       currentPath = (_state as CycleState).cyclePath;
       cycle = _extractCycle(currentPath);
     } else if (_state is PathState) {
       context = (_state as PathState).cont.cont;
-      currentPath = (_state as PathState).cont.result.path;
+      Result result = (_state as PathState).cont.result;
+      currentPath = result.path;
+      nodeCosts[result.path.hd] = result.cost;
       endPath = currentPath;
     } else if (_state is FinalState) {
-      currentPath = (_state as FinalState).result.path;
+      Result result = (_state as FinalState).result;
+      currentPath = result.path;
+      nodeCosts[_graph.graph.end] = result.cost;
       endPath = currentPath;
     } else if (_state is NodeState) {
       context = (_state as NodeState).cont;
@@ -141,6 +146,10 @@ class ShortestPathDriver {
       currentPath = _extractPath((_state as ContState).cont);
     }
     PList<Edge> todoEdges = flatten(_extractEdgesToDo(context));
+
+    context.foldr((EdgesContext e, _) {
+      nodeCosts[e.currentFullPath.hd] = e.currentCost;
+    }, []);
 
     bool visit(PList<Node> path, Node src, Node dst) {
       if (path.empty) return false;
@@ -162,7 +171,8 @@ class ShortestPathDriver {
               ? "blue" : (visitEdges(todoEdges, src, dst))
                 ? "gray" : "lightgray",
         nodeColorFn: (Node n) =>
-        (currentPath.any((Node other) => n.id == other.id))? "white": "gray");
+          (currentPath.any((Node other) => n.id == other.id))? "white": "gray",
+        nodeTextFn: (Node n) => nodeCosts.containsKey(n) ? "${(nodeCosts[n]*10).floor()/10}" : "");
     print(currentPath);
     return (_state is FinalState);
   }

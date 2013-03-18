@@ -8,6 +8,7 @@ import 'dajkstra/dajkstra.dart';
 
 typedef String EdgeColorFunc(Node, Node);
 typedef String NodeColorFunc(Node);
+typedef String NodeTextFunc(Node);
 
 class GraphPainter {
   CanvasElement _canvasElement;
@@ -44,10 +45,11 @@ class GraphPainter {
     _drawNodes(graph);
   }
 
-  void drawPath(DisplayableGraph graph, {EdgeColorFunc edgeColorFn: null, NodeColorFunc nodeColorFn: null}) {
+  void drawPath(DisplayableGraph graph, {EdgeColorFunc edgeColorFn: null, NodeColorFunc nodeColorFn: null,
+                                         NodeTextFunc nodeTextFn: null}) {
     _initCanvas();
     _drawEdges(graph, edgeColorFun: edgeColorFn);
-    _drawNodes(graph, nodeColorFun: nodeColorFn);
+    _drawNodes(graph, nodeColorFun: nodeColorFn, nodeTextFn: nodeTextFn);
   }
 
 
@@ -68,8 +70,9 @@ class GraphPainter {
   num _transformX(num x) => x * _cellWidth + _cellWidth/2;
   num _transformY(num y) => y * _cellHeight + _cellHeight/2;
 
-  void _drawNodes(DisplayableGraph graph, {nodeColorFun: null}) {
+  void _drawNodes(DisplayableGraph graph, {nodeColorFun: null, NodeTextFunc nodeTextFn: null}) {
     nodeColorFun = (nodeColorFun == null)? (_) => "gray" : nodeColorFun;
+    nodeTextFn = (nodeTextFn == null)? (_) => "" : nodeTextFn;
     PList<Node> nodes = graph.graph.nodes;
     while(!nodes.empty) {
       Node node = nodes.hd;
@@ -90,7 +93,7 @@ class GraphPainter {
 
       _context.font = "Arial";
       _context.fillStyle = "black";
-      _context.fillText(node.id, sx-8, sy+3);
+      _context.fillText(nodeTextFn(node), sx-8, sy+3);
 
       nodes = nodes.tl;
     }
