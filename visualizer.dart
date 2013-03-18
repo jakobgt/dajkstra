@@ -120,31 +120,38 @@ class ShortestPathDriver {
     PList<Node> endPath = new PList();
     Context context = new EmptyContext();
     Map<Node, num> nodeCosts = new Map();
-    if (_state is CycleState) {
-      context = (_state as CycleState).cont.cont;
-      currentPath = (_state as CycleState).cyclePath;
-      cycle = _extractCycle(currentPath);
-    } else if (_state is PathState) {
-      context = (_state as PathState).cont.cont;
-      Result result = (_state as PathState).cont.result;
-      currentPath = result.path;
-      nodeCosts[result.path.hd] = result.cost;
-      endPath = currentPath;
-    } else if (_state is FinalState) {
-      Result result = (_state as FinalState).result;
-      currentPath = result.path;
-      nodeCosts[_graph.graph.end] = result.cost;
-      endPath = currentPath;
-    } else if (_state is NodeState) {
-      context = (_state as NodeState).cont;
-      currentPath = (_state as NodeState).currentPath.cons((_state as NodeState).currentNode);
-    } else if (_state is EdgesState) {
-      context = (_state as EdgesState).cont;
-      currentPath = (_state as EdgesState).currentFullPath;
-    } else if (_state is ContState) {
-      context = (_state as ContState).cont;
-      currentPath = _extractPath((_state as ContState).cont);
-    }
+    _state.match(
+        onCycle: (state) {
+                   context = state.cont.cont;
+                   currentPath = state.cyclePath;
+                   cycle = _extractCycle(currentPath);
+                 },
+        onPath: (state) {
+                   context = state.cont.cont;
+                   Result result = state.cont.result;
+                   currentPath = result.path;
+                   nodeCosts[result.path.hd] = result.cost;
+                   endPath = currentPath;
+                 },
+        onFinal: (state) {
+                   Result result = state.result;
+                   currentPath = result.path;
+                   nodeCosts[_graph.graph.end] = result.cost;
+                   endPath = currentPath;
+                 },
+        onNode: (state) {
+                   context = state.cont;
+                   currentPath = state.currentPath.cons(state.currentNode);
+                 },
+        onEdges: (state) {
+                   context = state.cont;
+                   currentPath = state.currentFullPath;
+                 },
+        onCont: (state) {
+                   context = state.cont;
+                   currentPath = _extractPath(state.cont);
+                 }
+    );
     PList<Edge> todoEdges = flatten(_extractEdgesToDo(context));
 
     context.foldr((EdgesContext e, _) {
