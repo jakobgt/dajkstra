@@ -90,7 +90,7 @@ class ShortestPathDriver {
   }
 
   PList flatten(PList<PList> list) {
-    if (list.empty) return new PList();
+    if (list.isEmpty) return new PList();
     else {
       return list.hd.foldr((e, acc) => acc.cons(e), flatten(list.tl));
     }
@@ -99,7 +99,7 @@ class ShortestPathDriver {
   PList<Node> _extractCycle(PList<Node> cycle) {
     Node head = cycle.hd;
     PList<Node> visit(PList<Node> cycle) {
-      if (cycle.empty) {
+      if (cycle.isEmpty) {
         throw new Exception("Did not find the $head in the list, which is an error, as it is a cycle");
       } else if (cycle.hd == head) {
         return new PList().cons(cycle.hd);
@@ -159,10 +159,10 @@ class ShortestPathDriver {
     }, []);
 
     bool visit(PList<Node> path, Node src, Node dst) {
-      if (path.empty) return false;
+      if (path.isEmpty) return false;
       // Remember that the graph is undirected
-      if (path.hd == dst && !path.tl.empty && path.tl.hd == src ||
-          path.hd == src && !path.tl.empty && path.tl.hd == dst) return true;
+      if (path.hd == dst && !path.tl.isEmpty && path.tl.hd == src ||
+          path.hd == src && !path.tl.isEmpty && path.tl.hd == dst) return true;
       else return visit(path.tl, src, dst);
     }
     bool visitEdges(PList<Edge> edges, Node src, Node dst) {

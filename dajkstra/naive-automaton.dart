@@ -139,9 +139,9 @@ class EdgesState extends State {
              this.graph,
              this.cont);
   State step() {
-    return (edges.empty)
+    return (edges.isEmpty)
       ? new ContState(cont, bestRes)
-      : (!currentFullPath.tl.empty && edges.hd.dest == currentFullPath.tl.hd)
+      : (!currentFullPath.tl.isEmpty && edges.hd.dest == currentFullPath.tl.hd)
         ? new EdgesState(edges.tl, bestRes, currentFullPath, currentCost, graph, cont).step()
           : new NodeState(edges.hd.dest,
                           currentFullPath,

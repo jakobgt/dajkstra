@@ -44,7 +44,7 @@ abstract class Graph {
   }
   Node get start => _nodes[0];
   Node get end => _nodes[_nodes.length - 1];
-  PList<Node> get nodes => new PList.fromDList(_nodes);
+  PList<Node> get nodes => new PList.fromList(_nodes);
 
   // Edge related interface
   void _addEdge(int i, int j, num cost);
@@ -66,7 +66,7 @@ abstract class Graph {
 
   factory Graph.fromList(num nodeCount, PList<Edge<num>> edges) {
     var graph = new GraphList(nodeCount);
-    while(!edges.empty) {
+    while(!edges.isEmpty) {
       Edge<num> edge = edges.hd;
       graph._addEdge(edge.src, edge.dest, edge.cost);
       edges = edges.tl;

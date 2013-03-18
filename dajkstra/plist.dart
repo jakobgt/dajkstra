@@ -5,9 +5,12 @@ part of dajkstra;
  * empty list is defined by PList and PCons implements a link in a
  * non-empty list.
  */
-class PList<T> {
+class PList<T> extends Iterable<T> {
+  // Create an empty persistent list.
   PList();
-  factory PList.fromDList(List<T> list) {
+
+  // Create a persistent list with elements taken from another list.
+  factory PList.fromList(List<T> list) {
     PList<T> pList = new PList();
     for(int i = list.length -1; i >= 0; --i) {
       pList = pList.cons(list[i]);
@@ -15,68 +18,49 @@ class PList<T> {
     return pList;
   }
 
-  bool get empty => true;
+  // Add an element to the front of the list.
   PList<T> cons(T hd) => new PCons(hd, this);
 
-  int get length {
-    int len = 0;
-    PList<T> curr = this;
-    while (!curr.empty) {
-      ++len;
-      curr = curr.tl;
-    }
-    return len;
-  }
+  // Get an iterator object for this list.
+  Iterator<T> get iterator => new PListIterator<T>(this);
 
-  bool any(pred) {
-    PList<T> curr = this;
-    while (!curr.empty) {
-      if (pred(curr.hd)) return true;
-      curr = curr.tl;
-    }
-    return false;
-  }
+  // Pretty print the list
+  String toString() => "[${join(', ')}]";
 
-  String toString() {
-    var str = new StringBuffer("[");
-    if (!this.empty) {
-      str.write(this.hd.toString());
-      PList<T> ls = this.tl;
-      while (ls is PCons) {
-        str.write(", ");
-        str.write(ls.hd.toString());
-        ls = ls.tl;
-      }
-    }
-    str.write("]");
-    return str.toString();
-  }
-
-  PList<dynamic> map(dynamic fn(T elm)) {
-    return new PList();
-  }
-
-  dynamic foldr(dynamic fn(T, dynamic), dynamic acc) {
-    return acc;
-  }
+  // Some utility functions not defined by Iterable.
+  dynamic foldr(dynamic fn(T, dynamic), dynamic acc) => acc;
+  PList<T> reverse() => reduce(new PList(), (ys, x) => ys.cons(x));
 }
 
 /**
  * An immutable cons cell in a linked list.
  */
 class PCons<T> extends PList<T> {
-  T _hd;
-  PList<T> _tl;
-  PCons(T this._hd, PList<T> this._tl);
-  T get hd => this._hd;
-  PList<T> get tl => this._tl;
-  bool get empty => false;
+  final T hd;        // The head or the first element of the list.
+  final PList<T> tl; // The tail or the "rest" of the list.
 
-  PList<dynamic> map(dynamic fn(T elm)) {
-    return _tl.map(fn).cons(fn(_hd));
-  }
+  // Internally construct a cell in the list. See PList.cons.
+  PCons(T this.hd, PList<T> this.tl);
 
-  dynamic foldr(dynamic fn(T, dynamic), dynamic acc) {
-    return fn (_hd, _tl.foldr(fn, acc));
+  // Inductive case of the recursive fold. Use Iterable.reduce for a "foldl".
+  dynamic foldr(dynamic fn(T, dynamic), dynamic acc)
+      => fn (hd, tl.foldr(fn, acc));
+}
+
+/**
+ * A (non-persistent) iterator for a persistent list. Uses a dummy
+ * cons cell since the first element in the sequence is the content of
+ * 'current' after a call to 'moveNext'.
+ */
+class PListIterator<T> implements Iterator<T> {
+  PList<T> curr;
+  PListIterator(xs) : this.curr = xs.cons(null);
+  T get current => curr.hd;
+  bool moveNext() {
+    if (curr.tl is PCons) {
+      curr = curr.tl;
+      return true;
+    }
+    return false;
   }
 }
