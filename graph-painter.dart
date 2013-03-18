@@ -6,6 +6,9 @@ import "dart:html" hide Node;
 import "dart:math";
 import 'dajkstra/dajkstra.dart';
 
+typedef String EdgeColorFunc(Node, Node);
+typedef String NodeColorFunc(Node);
+
 class GraphPainter {
   CanvasElement _canvasElement;
   CanvasRenderingContext2D _context;
@@ -41,31 +44,12 @@ class GraphPainter {
     _drawNodes(graph);
   }
 
-  void drawPath(DisplayableGraph graph, PList<Node> path) {
+  void drawPath(DisplayableGraph graph, {EdgeColorFunc edgeColorFn: null, NodeColorFunc nodeColorFn: null}) {
     _initCanvas();
-    _drawEdges(graph);
-    _drawPath(graph, path);
-    // Nodes that are in the path are colored white. All other gray (except start and end)
-    _drawNodes(graph, colorFun: (Node n) =>
-        (path.any((Node other) => n.id == other.id))? "white": "gray");
+    _drawEdges(graph, edgeColorFun: edgeColorFn);
+    _drawNodes(graph, nodeColorFun: nodeColorFn);
   }
 
-  void _drawPath(DisplayableGraph graph, PList<Node> path) {
-    if (path.empty) return;
-    _context.beginPath();
-    _context.strokeStyle = "lightgreen";
-    _context.lineWidth = 5;
-    path.foldr((node, acc) {
-      var eucNode = graph.euclidNodeFromId(node.id);
-      if (acc) {
-        _context.moveTo(_transformX(eucNode.x), _transformY(eucNode.y));
-      } else {
-        _context.lineTo(_transformX(eucNode.x), _transformY(eucNode.y));
-      }
-      return false;
-    }, true); // Acc states whether it is the first
-    _context.stroke();
-  }
 
   void _drawGrid() {
     _context.beginPath();
@@ -84,8 +68,8 @@ class GraphPainter {
   num _transformX(num x) => x * _cellWidth + _cellWidth/2;
   num _transformY(num y) => y * _cellHeight + _cellHeight/2;
 
-  void _drawNodes(DisplayableGraph graph, {colorFun: null}) {
-    colorFun = (colorFun == null)? (_) => "gray" : colorFun;
+  void _drawNodes(DisplayableGraph graph, {nodeColorFun: null}) {
+    nodeColorFun = (nodeColorFun == null)? (_) => "gray" : nodeColorFun;
     PList<Node> nodes = graph.graph.nodes;
     while(!nodes.empty) {
       Node node = nodes.hd;
@@ -100,14 +84,20 @@ class GraphPainter {
       _context.fillStyle
          = (node.id == 0) ? "lightgreen" // Start node
           : (node.id == graph.graph.nodeCount - 1) ? "#F17022" //end node
-          : colorFun(node);
+          : nodeColorFun(node);
       _context.fill();
       _context.stroke();
+
+      _context.font = "Arial";
+      _context.fillStyle = "black";
+      _context.fillText(node.id, sx-8, sy+3);
+
       nodes = nodes.tl;
     }
   }
 
-  void _drawEdges(DisplayableGraph graph) {
+  void _drawEdges(DisplayableGraph graph, {EdgeColorFunc edgeColorFun: null}) {
+    edgeColorFun = (edgeColorFun == null) ? (x, y) => "gray": edgeColorFun;
     graph.graph.nodes.map((Node srcNode) {
       EucNode eucNode = graph.euclidNodeFromId(srcNode.id);
       var eucNodeSX = _transformX(eucNode.x);
@@ -116,7 +106,7 @@ class GraphPainter {
       edges.map((Edge<Node> edge) {
         var dstNode = edge.dest;
         _context.beginPath();
-        _context.strokeStyle = "gray";
+        _context.strokeStyle = edgeColorFun(srcNode, dstNode);
         _context.lineWidth = 2;
         EucNode dstEucNode = graph.euclidNodeFromId(dstNode.id);
         var dstNodeSX = _transformX(dstEucNode.x);

@@ -16,7 +16,7 @@ var mapHeightMax = 600 * scale;
 var runSpeed = 100;
 
 const easyGraph = 3;
-const hardGraph = 50;
+const hardGraph = 100;
 
 void main() {
   print("Running main");
@@ -72,17 +72,70 @@ class ShortestPathDriver {
     _graphPainter.drawGraph(_graph);
   }
 
+  PList<Node> _extractPath(Context cont) {
+    if (cont is EmptyContext)
+      return new PList();
+    else {
+      var context = (cont as EdgesContext);
+      return context.currentFullPath;
+    }
+  }
+
+  PList<Node> _extractCycle(PList<Node> cycle) {
+    Node head = cycle.hd;
+    PList<Node> visit(PList<Node> cycle) {
+      if (cycle.empty) {
+        throw new Exception("Did not find the $head in the list, which is an error, as it is a cycle");
+      } else if (cycle.hd == head) {
+        return new PList().cons(cycle.hd);
+      } else {
+        return visit(cycle.tl).cons(cycle.hd);
+      }
+    }
+    return visit(cycle.tl).cons(head);
+  }
+
   // Takes a step and repaint the graph with the given path.
   // It returns true, when there are no more steps to take.
   bool takeNaiveStep() {
     if (_state == null) _state = new NaiveAutomaton().startStepping(_graph.graph);
-    do {
-      _state = _state.step();
-    } while(!(_state is FinalState) && !(_state is NodeState));
-    PList<Node> path = (_state is FinalState) ? (_state as FinalState).result.path :
-        (_state as NodeState).currentPath.cons((_state as NodeState).currentNode);
-    _graphPainter.drawPath(_graph, path);
-    print(path);
+    _state = _state.step();
+    PList<Node> currentPath = new PList();
+    PList<Node> cycle = new PList();
+    PList<Node> endPath = new PList();
+    if (_state is CycleState) {
+      currentPath = (_state as CycleState).cyclePath;
+      cycle = _extractCycle(currentPath);
+    } else if (_state is PathState) {
+      currentPath = (_state as PathState).cont.result.path;
+      endPath = currentPath;
+    } else if (_state is FinalState) {
+      currentPath = (_state as FinalState).result.path;
+      endPath = currentPath;
+    } else if (_state is NodeState) {
+      currentPath = (_state as NodeState).currentPath.cons((_state as NodeState).currentNode);
+    } else if (_state is EdgesState) {
+      currentPath = (_state as EdgesState).currentFullPath;
+    } else if (_state is ContState) {
+      currentPath = _extractPath((_state as ContState).cont);
+    }
+
+    bool visit(PList<Node> path, Node src, Node dst) {
+      if (path.empty) return false;
+      // Remember that the graph is undirected
+      if (path.hd == dst && !path.tl.empty && path.tl.hd == src ||
+          path.hd == src && !path.tl.empty && path.tl.hd == dst) return true;
+      else return visit(path.tl, src, dst);
+    }
+    _graphPainter.drawPath(_graph,
+        edgeColorFn: (Node src, Node dst) =>
+        (visit(cycle, src, dst))
+          ? "red" : (visit(endPath, src, dst))
+            ? "lightgreen" : (visit(currentPath, src, dst))
+              ? "blue" : "gray",
+        nodeColorFn: (Node n) =>
+        (currentPath.any((Node other) => n.id == other.id))? "white": "gray");
+    print(currentPath);
     return (_state is FinalState);
   }
 

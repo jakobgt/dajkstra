@@ -37,8 +37,9 @@ abstract class State {
 }
 
 class CycleState extends State {
+  PList<Node> cyclePath;
   ContState cont;
-  CycleState(this.cont);
+  CycleState(this.cyclePath, this.cont);
   State step() => cont;
   String toString() => "CYCLE";
 }
@@ -73,7 +74,7 @@ class NodeState extends State {
     return (currentNode.id == graph.end.id)
         ? new PathState(new ContState(cont, new Result(currentFullPath, currentCost)))
         : ((currentPath.any((elm) => elm.id == currentNode.id))
-           ? new CycleState(new ContState(cont, new Result.NoPath()))
+           ? new CycleState(currentFullPath, new ContState(cont, new Result.NoPath()))
            : new EdgesState(graph.adjacent(currentNode),
                             new Result.NoPath(),
                             currentFullPath,
@@ -100,16 +101,18 @@ class EdgesState extends State {
   State step() {
     return (edges.empty)
       ? new ContState(cont, bestRes)
-      : new NodeState(edges.hd.dest,
-                      currentFullPath,
-                      currentCost + edges.hd.cost,
-                      graph,
-                      new EdgesContext(edges,
-                                       bestRes,
-                                       currentFullPath,
-                                       currentCost,
-                                       graph,
-                                       cont));
+      : (!currentFullPath.tl.empty && edges.hd.dest == currentFullPath.tl.hd)
+        ? new EdgesState(edges.tl, bestRes, currentFullPath, currentCost, graph, cont).step()
+          : new NodeState(edges.hd.dest,
+                          currentFullPath,
+                          currentCost + edges.hd.cost,
+                          graph,
+                          new EdgesContext(edges,
+                                           bestRes,
+                                           currentFullPath,
+                                           currentCost,
+                                           graph,
+                                           cont));
   }
   String toString() => "EDGES($edges)";
 }

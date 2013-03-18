@@ -81,17 +81,17 @@ class GraphGenerator {
       for (var j = 0; j < 2; ++j) {
         var dst = _random.nextInt(nodes.length-1);
         if (identical(src, dst)) continue;
-        _addEdge(src, _resolveEdge(src, dst, nodes), edges);
+        _addEdge(src, _resolveEdge(src, dst, nodes, edges), edges);
       }
     }
     // Add short paths while the graph remains unconnected.
     while (!_isConnected(nodes, edges))
-      _connectGroup(nodes, edges);
+      _tryToConnectGroup(nodes, edges);
     return edges;
   }
 
   // Finds the closest node to src on the line defined by the two points src and dst.
-  num _resolveEdge(num src, num dst, List<EucNode> nodes) {
+  num _resolveEdge(num src, num dst, List<EucNode> nodes, List<List<num>> edges) {
     var closest = nodes[src].distToPoint(nodes[dst]);
     var dst_final = dst;
     for (var i = 0; i < nodes.length; ++i) {
@@ -144,22 +144,22 @@ class GraphGenerator {
   }
 
   // Connect some unconnected node to the closest root-connected node.
-  void _connectGroup(List<EucNode> nodes, List<List<num>> edges) {
+  void _tryToConnectGroup(List<EucNode> nodes, List<List<num>> edges) {
     var visited = _getReachableNodes(nodes, edges);
     for (var i = 0; i < nodes.length; ++i) {
       if (!visited.contains(nodes[i])) {
-        var minIndex = -1;
+        var minIndex = 0;
         var minDist = double.INFINITY;
         for (var j = 0; j < nodes.length; ++j) {
           if (visited.contains(nodes[j])) {
             var dist = nodes[i].distToPoint(nodes[j]);
-            if (minIndex == -1 || dist < minDist) {
+            if (dist < minDist) {
               minIndex = j;
               minDist = dist;
             }
           }
         }
-        _addEdge(i, minIndex, edges);
+        _addEdge(minIndex, i, edges);
         return;
       }
     }

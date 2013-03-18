@@ -36,6 +36,8 @@ class NaiveAlgorithm {
     visit(PList<Edge> edges, Result bestRes) {
       if (edges.empty) {
         return bestRes;
+      } else if (!currentPath.empty && edges.hd.dest == currentPath.hd) {
+        return visit(edges.tl, bestRes);
       } else {
         var edge = edges.hd;
         var result = _findFromCurrentNode(edge.dest, currentFullPath,
