@@ -2,7 +2,7 @@
 *  This file is used to run the algorithms in the browser.
 */
 
-import 'dart:html' show query, CanvasElement;
+import 'dart:html' show query, CanvasElement, HTMLInputElement;
 import 'dart:async';
 import 'dajkstra/dajkstra.dart';
 import 'graph-painter.dart';
@@ -18,22 +18,54 @@ var runSpeed = 100;
 const easyGraph = 1;
 const hardGraph = 30;
 
+void disableDijkstra() {
+  query("#btn_dijkstra_step").disabled = true;
+  query("#btn_dijkstra_run").disabled = true;
+}
+
 void main() {
   print("Running main");
+  var buttons = ["#btn_reset", "#btn_easy_map", "#btn_hard_map", "#btn_naive_step",
+                 "#btn_naive_run", "#btn_dijkstra_step", "#btn_dijkstra_run"];
+  buttons = new List.from(buttons.map((String s) => query(s)));
+  print(buttons);
+  buttons[0].disabled = true;
+  enableAllButtons() => new List.from(buttons.map((var elm) => elm.disabled = false));
   // An empty timer in order to avoid null values.
   var timer = new Timer(new Duration(seconds: 0), () {});
   ShortestPathDriver resetGraph(int graphComplexity) {
     timer.cancel();
+    enableAllButtons();
     return new ShortestPathDriver(query("#map"), nodeCount,
         xmax, ymax, mapWidthMax, mapHeightMax)..generateGraph(graphComplexity);
   }
   var driver = resetGraph(easyGraph);
   // Setting up buttons.
-  query("#btn_reset").onClick.listen((e) => driver.resetPath());
+  query("#btn_reset").onClick.listen((e) {
+    enableAllButtons();
+    driver.resetPath();
+  });
   query("#btn_easy_map").onClick.listen((e) {driver = resetGraph(easyGraph); });
   query("#btn_hard_map").onClick.listen((e) {driver = resetGraph(hardGraph); });
-  query("#btn_naive_step").onClick.listen((e) => driver.takeNaiveStep());
-  query("#btn_naive_run").onClick.listen((e) {timer = driver.runNaive(runSpeed);});
+  query("#btn_naive_step").onClick.listen((e) {
+    disableDijkstra();
+    driver.takeNaiveStep();
+  });
+  bool runningNaive = false;
+  query("#btn_naive_run").onClick.listen((e) {
+    var button = query("#btn_naive_run");
+    disableDijkstra();
+    timer.cancel();
+    if (runningNaive) {
+      timer.cancel();
+      button.value = "Run Naive";
+      runningNaive = false;
+    } else {
+      timer = driver.runNaive(runSpeed);
+      button.value = "Stop naive run";
+      runningNaive = true;
+    }
+  });
 }
 
 class ShortestPathDriver {
@@ -169,7 +201,7 @@ class ShortestPathDriver {
           ? "red" : (visit(endPath, src, dst))
             ? "green" : (visit(currentPath, src, dst))
               ? "blue" : (visitEdges(todoEdges, src, dst))
-                ? "gray" : "lightgray",
+                ? "lightblue" : "gray",
         nodeColorFn: (Node n) =>
           (currentPath.any((Node other) => n.id == other.id))? "white": "gray",
         nodeTextFn: (Node n) => nodeCosts.containsKey(n) ? "${(nodeCosts[n]*10).floor()/10}" : "");
