@@ -218,6 +218,10 @@ class ShortestPathDriver {
   bool takeNaiveStep() {
     if (_state == null) _state = new NaiveAutomaton().startStepping(_graph.graph);
     _state = _state.step();
+    dynamic idFun(dynamic x) => x;
+    // If we have a EdgesState we continue;
+    _state = _state.match(onEdges: (state) => _state.step(), onCycle: idFun, onPath: idFun, onFinal: idFun,
+                          onNode: idFun, onCont: idFun);
     PList<Node> currentPath = new PList();
     PList<Node> cycle = new PList();
     PList<Node> endPath = new PList();

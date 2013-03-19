@@ -34,6 +34,7 @@ class NaiveAutomaton {
 
 abstract class State {
   State step();
+
   dynamic match({
       dynamic onCycle(CycleState),
       dynamic onPath(PathState),
