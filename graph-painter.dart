@@ -56,11 +56,11 @@ class GraphPainter {
   void _drawGrid() {
     _context.beginPath();
     _context.strokeStyle = "#eee";
-    for (int i = _cellWidth/2; i < _mapWidth; i += _cellWidth) {
+    for (num i = _cellWidth/2; i < _mapWidth; i += _cellWidth) {
       _context.moveTo(i, 0);
       _context.lineTo(i, _mapHeight);
     }
-    for (int i = _cellHeight/2; i < _mapHeight; i += _cellHeight) {
+    for (num i = _cellHeight/2; i < _mapHeight; i += _cellHeight) {
       _context.moveTo(0, i);
       _context.lineTo(_mapWidth, i);
     }
