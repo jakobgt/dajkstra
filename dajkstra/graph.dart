@@ -51,6 +51,19 @@ abstract class Graph {
   PList<Edge<Node>> adjacent(Node n);
 
   // Some predefined graphs
+  factory Graph.forExercise() {
+    return new GraphList(6)
+        .._addEdge(0, 1, 200)
+        .._addEdge(0, 2, 150)
+        .._addEdge(1, 3, 150)
+        .._addEdge(1, 4, 150)
+        .._addEdge(2, 3, 150)
+        .._addEdge(2, 4, 200)
+        .._addEdge(3, 4, 50)
+        .._addEdge(3, 5, 100)
+        .._addEdge(4, 5, 150);
+  }
+
   factory Graph.AU() {
     return new GraphList(7)
         .._addEdge(0, 1, 500)
