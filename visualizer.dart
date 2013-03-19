@@ -86,7 +86,8 @@ void main() {
       button.value = "Run Dijkstra";
       runningDijkstra = false;
     } else {
-      timer = driver.runNaive(driver.takeDijkstraStep, runSpeed);
+      //Dijkstras should run a little slower, because it does not have as many steps.
+      timer = driver.runNaive(driver.takeDijkstraStep, 2* runSpeed);
       button.value = "Stop Dijkstra run";
       runningDijkstra = true;
     }
