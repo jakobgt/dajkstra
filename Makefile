@@ -7,6 +7,12 @@ DART=dart
 DART2JS=dart2js
 BUILD=build
 
+publish: $(VISUALIZER)
+	mkdir -p example
+	cp $(BUILD)/$(VISUALIZER).dart.* example/
+	sed -E s_build/__ index.html > example/index.html
+	scp example/* gedefar@fh.cs.au.dk:~/public_html/shortest-path
+
 build-dir:
 	mkdir -p $(BUILD)
 
