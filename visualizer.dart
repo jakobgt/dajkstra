@@ -23,6 +23,11 @@ void disableDijkstra() {
   query("#btn_dijkstra_run").disabled = true;
 }
 
+void disableNaive() {
+  query("#btn_naive_step").disabled = true;
+  query("#btn_naive_run").disabled = true;
+}
+
 void main() {
   print("Running main");
   var buttons = ["#btn_reset", "#btn_easy_map", "#btn_hard_map", "#btn_naive_step",
@@ -61,11 +66,32 @@ void main() {
       button.value = "Run Naive";
       runningNaive = false;
     } else {
-      timer = driver.runNaive(runSpeed);
+      timer = driver.runNaive(driver.takeNaiveStep, runSpeed);
       button.value = "Stop naive run";
       runningNaive = true;
     }
   });
+
+  query("#btn_dijkstra_step").onClick.listen((e) {
+    disableNaive();
+    driver.takeDijkstraStep();
+  });
+  bool runningDijkstra = false;
+  query("#btn_dijkstra_run").onClick.listen((e) {
+    var button = query("#btn_dijkstra_run");
+    disableNaive();
+    timer.cancel();
+    if (runningDijkstra) {
+      timer.cancel();
+      button.value = "Run Dijkstra";
+      runningDijkstra = false;
+    } else {
+      timer = driver.runNaive(driver.takeDijkstraStep, runSpeed);
+      button.value = "Stop Dijkstra run";
+      runningDijkstra = true;
+    }
+  });
+
 }
 
 class ShortestPathDriver {
@@ -75,6 +101,7 @@ class ShortestPathDriver {
 
   GraphGenerator _graphGenerator = new GraphGenerator();
   NaiveAlgorithm _naiveAlgorithm = new NaiveAlgorithm();
+  DijkstraAlgorithm _dijkstraAlgorithm;
   GraphPainter _graphPainter;
 
   DisplayableGraph _graph;
@@ -96,12 +123,14 @@ class ShortestPathDriver {
     } while (nrOfPaths < numberOfRoutes);
     _graph = graph;
     _graphPainter.drawGraph(_graph);
+    _dijkstraAlgorithm = new DijkstraAlgorithm(_graph.graph);
   }
 
   void resetPath() {
     _state = null;
     _timer.cancel();
     _graphPainter.drawGraph(_graph);
+    _dijkstraAlgorithm = new DijkstraAlgorithm(_graph.graph);
   }
 
   PList<Node> _extractPath(Context cont) {
@@ -140,6 +169,47 @@ class ShortestPathDriver {
       }
     }
     return visit(cycle.tl).cons(head);
+  }
+
+  // Calls fn succesively until it stops (with a delay of speed ms).
+  // Returns the timer that handles the call to takeNaiveStep.
+  Timer runNaive(bool fn(), int speed) {
+    _timer = new Timer.repeating(new Duration(milliseconds: speed), (Timer timer) {
+      if (fn()) {
+        timer.cancel();
+      }
+    });
+    return _timer;
+  }
+
+  bool takeDijkstraStep() {
+    var currentEndNode = _dijkstraAlgorithm.takeStep();
+    PList<Node> currentPath = _dijkstraAlgorithm.getPath(currentEndNode);
+    print(currentPath);
+    String pathColor = (currentEndNode == _graph.graph.end) ? "lightgreen" : "blue";
+    _graphPainter.drawPath(_graph,
+      edgeColorFn: (Node src, Node dst) =>
+        (visit(currentPath, src, dst))
+          ? pathColor : "gray",
+    nodeColorFn: (Node n) =>
+      _dijkstraAlgorithm.visited.contains(n) ? "white"
+        : _dijkstraAlgorithm.allCosts[n] != double.INFINITY ? "lightblue" : "gray",
+    nodeTextFn: (Node n) =>
+      _dijkstraAlgorithm.allCosts[n] != double.INFINITY ? "${(_dijkstraAlgorithm.allCosts[n]*10).floor()/10}" : "");
+    return (currentEndNode == _graph.graph.end);
+  }
+
+  bool visit(PList<Node> path, Node src, Node dst) {
+    if (path.isEmpty) return false;
+    // Remember that the graph is undirected
+    if (path.hd == dst && !path.tl.isEmpty && path.tl.hd == src ||
+        path.hd == src && !path.tl.isEmpty && path.tl.hd == dst) return true;
+    else return visit(path.tl, src, dst);
+  }
+
+  bool visitEdges(PList<Edge> edges, Node src, Node dst) {
+    return edges.any((Edge otherE) => otherE.src == src && otherE.dest == dst ||
+    otherE.src == dst && otherE.dest == src);
   }
 
   // Takes a step and repaint the graph with the given path.
@@ -190,18 +260,6 @@ class ShortestPathDriver {
       nodeCosts[e.currentFullPath.hd] = e.currentCost;
     }, []);
 
-    bool visit(PList<Node> path, Node src, Node dst) {
-      if (path.isEmpty) return false;
-      // Remember that the graph is undirected
-      if (path.hd == dst && !path.tl.isEmpty && path.tl.hd == src ||
-          path.hd == src && !path.tl.isEmpty && path.tl.hd == dst) return true;
-      else return visit(path.tl, src, dst);
-    }
-    bool visitEdges(PList<Edge> edges, Node src, Node dst) {
-      return edges.any((Edge otherE) => otherE.src == src && otherE.dest == dst ||
-                                        otherE.src == dst && otherE.dest == src);
-    }
-
     _graphPainter.drawPath(_graph,
         edgeColorFn: (Node src, Node dst) =>
         (visit(cycle, src, dst))
@@ -216,14 +274,4 @@ class ShortestPathDriver {
     return (_state is FinalState);
   }
 
-  // Calls takeNaiveStep succesively until it stops (with a delay of speed ms).
-  // Returns the timer that handles the call to takeNaiveStep.
-  Timer runNaive(int speed) {
-    _timer = new Timer.repeating(new Duration(milliseconds: speed), (Timer timer) {
-      if (takeNaiveStep()) {
-        timer.cancel();
-      }
-    });
-    return _timer;
-  }
 }

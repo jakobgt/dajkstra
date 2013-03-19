@@ -101,7 +101,7 @@ class GraphPainter {
 
   void _drawEdges(DisplayableGraph graph, {EdgeColorFunc edgeColorFun: null}) {
     edgeColorFun = (edgeColorFun == null) ? (x, y) => "gray": edgeColorFun;
-    for (Node srcNode in graph.graph.nodes.map) {
+    for (Node srcNode in graph.graph.nodes) {
       EucNode eucNode = graph.euclidNodeFromId(srcNode.id);
       var eucNodeSX = _transformX(eucNode.x);
       var eucNodeSY = _transformY(eucNode.y);

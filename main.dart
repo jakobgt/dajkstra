@@ -12,4 +12,9 @@ void main() {
   var pathCount = 0;
   print(new NaiveAlgorithm().findShortestPath(g/*, onPath : (p) => pathCount++*/));
   print("path count: $pathCount");
+  var dijkstraAlgorithm = new DijkstraAlgorithm(g);
+  Node nextStep;
+  while((nextStep = dijkstraAlgorithm.takeStep()) != g.end) {
+    print(nextStep);
+  }
 }
