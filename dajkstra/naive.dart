@@ -34,9 +34,9 @@ class NaiveAlgorithm {
       return new Result.NoPath();
     }
     visit(PList<Edge> edges, Result bestRes) {
-      if (edges.empty) {
+      if (edges.isEmpty) {
         return bestRes;
-      } else if (!currentPath.empty && edges.hd.dest == currentPath.hd) {
+      } else if (!currentPath.isEmpty && edges.hd.dest == currentPath.hd) {
         return visit(edges.tl, bestRes);
       } else {
         var edge = edges.hd;

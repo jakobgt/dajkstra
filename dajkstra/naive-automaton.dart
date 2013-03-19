@@ -34,6 +34,14 @@ class NaiveAutomaton {
 
 abstract class State {
   State step();
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  });
 }
 
 class CycleState extends State {
@@ -42,6 +50,14 @@ class CycleState extends State {
   CycleState(this.cyclePath, this.cont);
   State step() => cont;
   String toString() => "CYCLE";
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  }) => onCycle(this);
 }
 
 class PathState extends State {
@@ -49,6 +65,14 @@ class PathState extends State {
   PathState(this.cont);
   State step() => cont;
   String toString() => "FOUND PATH(${cont.result.cost})";
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  }) => onPath(this);
 }
 
 class FinalState extends State {
@@ -56,6 +80,14 @@ class FinalState extends State {
   FinalState(this.result);
   State step() => this;
   String toString() => "FINAL($result)";
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  }) => onFinal(this);
 }
 
 class NodeState extends State {
@@ -83,6 +115,14 @@ class NodeState extends State {
                             cont));
   }
   String toString() => "NODE($currentNode, $currentCost, $currentPath)";
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  }) => onNode(this);
 }
 
 class EdgesState extends State {
@@ -99,9 +139,9 @@ class EdgesState extends State {
              this.graph,
              this.cont);
   State step() {
-    return (edges.empty)
+    return (edges.isEmpty)
       ? new ContState(cont, bestRes)
-      : (!currentFullPath.tl.empty && edges.hd.dest == currentFullPath.tl.hd)
+      : (!currentFullPath.tl.isEmpty && edges.hd.dest == currentFullPath.tl.hd)
         ? new EdgesState(edges.tl, bestRes, currentFullPath, currentCost, graph, cont).step()
           : new NodeState(edges.hd.dest,
                           currentFullPath,
@@ -115,6 +155,14 @@ class EdgesState extends State {
                                            cont));
   }
   String toString() => "EDGES($edges)";
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  }) => onEdges(this);
 }
 
 class ContState extends State {
@@ -123,6 +171,14 @@ class ContState extends State {
   ContState(this.cont, this.result);
   State step() => cont.apply(result);
   String toString() => "CONTEXT($cont)";
+  dynamic match({
+      dynamic onCycle(CycleState),
+      dynamic onPath(PathState),
+      dynamic onFinal(FinalState),
+      dynamic onNode(NodeState),
+      dynamic onEdges(EdgesState),
+      dynamic onCont(ContState)
+  }) => onCont(this);
 }
 
 abstract class Context {

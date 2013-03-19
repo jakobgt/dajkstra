@@ -74,7 +74,7 @@ class GraphPainter {
     nodeColorFun = (nodeColorFun == null)? (_) => "gray" : nodeColorFun;
     nodeTextFn = (nodeTextFn == null)? (_) => "" : nodeTextFn;
     PList<Node> nodes = graph.graph.nodes;
-    while(!nodes.empty) {
+    while(!nodes.isEmpty) {
       Node node = nodes.hd;
       EucNode eucNode = graph.euclidNodeFromId(node.id);
       _context.beginPath();
@@ -101,12 +101,12 @@ class GraphPainter {
 
   void _drawEdges(DisplayableGraph graph, {EdgeColorFunc edgeColorFun: null}) {
     edgeColorFun = (edgeColorFun == null) ? (x, y) => "gray": edgeColorFun;
-    graph.graph.nodes.map((Node srcNode) {
+    for (Node srcNode in graph.graph.nodes.map) {
       EucNode eucNode = graph.euclidNodeFromId(srcNode.id);
       var eucNodeSX = _transformX(eucNode.x);
       var eucNodeSY = _transformY(eucNode.y);
       PList<Edge<Node>> edges = graph.graph.adjacent(srcNode);
-      edges.map((Edge<Node> edge) {
+      for (Edge<Node> edge in edges) {
         var dstNode = edge.dest;
         _context.beginPath();
         _context.strokeStyle = edgeColorFun(srcNode, dstNode);
@@ -117,8 +117,8 @@ class GraphPainter {
         _context.moveTo(eucNodeSX, eucNodeSY);
         _context.lineTo(dstNodeSX, dstNodeSY);
         _context.stroke();
-      });
-    });
+      }
+    }
   }
 
 }
