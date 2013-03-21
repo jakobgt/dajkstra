@@ -17,7 +17,7 @@ publish: $(VISUALIZER)
 	cp *.css $(EXAMPLEDIR)/
 	cp naive-simple.html $(EXAMPLEDIR)/
 	sed -E s_build/__ index.html > $(EXAMPLEDIR)/index.html
-	sed -E s_build/__ $(CODEJUMPER).html > $(EXAMPLEDIR)/$(CODEJUMPER).html
+	sed -E s_build/__ naive-simple.html > $(EXAMPLEDIR)/naive-simple.html
 	scp $(EXAMPLEDIR)/* gedefar@fh.cs.au.dk:~/public_html/shortest-path
 
 build-dir:

@@ -247,7 +247,7 @@ class ShortestPathDriver {
   // It returns true, when there are no more steps to take.
   bool takeNaiveStep() {
     if (_state.isEmpty) _state.add(new NaiveAutomaton().startStepping(_graph.graph));
-    _state.add(_state.last.step());
+    else _state.add(_state.last.step());
     _repaintNaive(_state.last);
     return (_state.last is FinalState);
   }
@@ -317,8 +317,8 @@ class ShortestPathDriver {
         ? "green" : (visit(currentPath, src, dst))
           ? "blue" : (visitEdges(todoEdges, src, dst))
             ? "lightblue" : "gray",
-    nodeColorFn: (Node n) =>
-        (currentPath.any((Node other) => n.id == other.id))? "white": "gray",
+    nodeColorFn: (Node n) => currentPath.hd == n
+      ? "lightblue" : (currentPath.any((Node other) => n.id == other.id))? "white": "gray",
     nodeTextFn: (Node n) => nodeCosts.containsKey(n) ? "${(nodeCosts[n]*10).floor()/10}" : "");
           print(currentPath);
     String newStateName = state.match(onEdges: (_) => "EdgesState", onCycle: (_) => "CycleState",
