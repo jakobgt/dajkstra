@@ -1,0 +1,14 @@
+#code {
+    height: 600px;
+    overflow: scroll;
+    width: 700px;
+}
+
+div {
+    display: inline;
+}
+
+div.highlighted {
+    background-color: lightgoldenrodyellow;
+    display:inline;
+}

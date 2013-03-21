@@ -5,8 +5,7 @@
     <title>Shortest Path</title>
     <script language="javascript" type="text/javascript" src="build/visualizer.dart.js"></script>
     <!--<script type="application/dart" src="build/visualizer.dart"></script>-->
-    <style type="text/css">
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <h2>An illustration of <a
@@ -42,12 +41,17 @@ the naive enumeration to Dijkstra's solution.
 <input id="btn_hard_map" type="button" value="New Hard Map"/>
 &mdash;
 <input id="btn_naive_step" type="button" value="Step Naive"/>
+<input id="btn_naive_backstep" type="button" value="Back step Naive"/>
 <input id="btn_naive_run" type="button" value="Run Naive"/>
 &mdash;
 <input id="btn_dijkstra_step" type="button" value="Step Dijkstra"/>
 <input id="btn_dijkstra_run" type="button" value="Run Dijkstra"/>
+&mdash;
+<label for="inp_run_speed">Run speed:</label><input id="inp_run_speed" type="input" value="100"/>
 <hr/>
-<canvas id="map"></canvas>
+<canvas id="map" style="float: left"></canvas>
+<iframe id="code" style="float:left"  src="naive-simple.html">
+</iframe>
 <hr/>
 </body>
 </html>

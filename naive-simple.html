@@ -1,0 +1,71 @@
+<html>
+<link rel="stylesheet" href="syntax.css" />
+<link rel="stylesheet" href="style.css" />
+<script language="javascript" type="text/javascript" src="build/code-jumper.dart.js"></script>
+<body>
+<div class="highlight"><pre><span class="k">part of</span> <span class="n">dajkstra</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="n">INVALID</span> <span class="o">=</span> <span class="kt">double</span><span class="p">.</span><span class="n">INFINITY</span><span class="p">;</span>
+<span class="kd">var</span> <span class="n">graph</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+<span class="n">findShortestPath</span><span class="p">(</span><span class="n">in_graph</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">graph</span> <span class="o">=</span> <span class="n">in_graph</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">search</span><span class="p">(</span><span class="n">graph</span><span class="p">.</span><span class="n">start</span><span class="p">,</span> <span class="k">new</span> <span class="n">PList</span><span class="p">(),</span> <span class="m">0</span><span class="p">);</span><span class="p">}</span>
+
+<span class="n">search</span><span class="p">(</span><span class="n">currentNode</span><span class="p">,</span> <span class="n">currentPath</span><span class="p">,</span> <span class="n">currentCost</span><span class="p">)</span> <span class="p">{</span><div id="NodeState">
+  <span class="c1">// <a name="NodeState">NodeState:</a></span>
+  <span class="c1">// Considering a new node in our search. Here &#39;currentNode&#39; is the</span>
+  <span class="c1">// node we are currently considering, &#39;currentPath&#39; is the path of</span>
+  <span class="c1">// nodes we have taken up to this point (not including</span>
+  <span class="c1">// &#39;currentNode&#39;) and &#39;currentCost&#39; is the total cost of the path up</span>
+  <span class="c1">// to the current node. The graph is represented by &#39;graph&#39;.</span></div>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">currentNode</span> <span class="o">==</span> <span class="n">graph</span><span class="p">.</span><span class="n">end</span><span class="p">)</span> <span class="p">{</span><div id="PathState">
+    <span class="c1">// <a name="PathState">PathState:</a></span>
+    <span class="c1">// A path has been found since &#39;currentNode&#39; is the end point of</span>
+    <span class="c1">// the path. So the result is the cost of this path.</span>
+    <span class="k">return</span> <span class="n">currentCost</span><span class="p">;</span></div>
+  <span class="p">}</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="n">visitedNode</span> <span class="k">in</span> <span class="n">currentPath</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">visitedNode</span> <span class="o">==</span> <span class="n">currentNode</span><span class="p">)</span> <span class="p">{</span><div id="CycleState">
+      <span class="c1">// <a name="CycleState" >CycleState:</a></span>
+      <span class="c1">// A cycle has been found since &#39;currentNode&#39; has already been</span>
+      <span class="c1">// visited.  I.e., it is already in the &#39;currentPath&#39; list.  So</span>
+      <span class="c1">// the result is &quot;invalid&quot; signified by the infinitely large cost.</span>
+      <span class="k">return</span> <span class="n">INVALID</span><span class="p">;</span></div>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Starting with an &quot;invalid&quot; cost, i.e., we don&#39;t know if there</span>
+  <span class="c1">// exists a path yet, we consider each edge of &#39;currentNode&#39; in turn:</span>
+  <span class="kd">var</span> <span class="n">lowestCost</span> <span class="o">=</span> <span class="n">INVALID</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="n">edge</span> <span class="k">in</span> <span class="n">graph</span><span class="p">.</span><span class="n">adjacent</span><span class="p">(</span><span class="n">currentNode</span><span class="p">))</span> <span class="p">{</span>
+
+    <span class="c1">// Ignore the edge if it points back to the last visited node,</span>
+    <span class="c1">// i.e., where we just came from.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">currentPath</span><span class="p">.</span><span class="n">isEmpty</span> <span class="o">&amp;&amp;</span> <span class="n">edge</span><span class="p">.</span><span class="n">dest</span> <span class="o">==</span> <span class="n">currentPath</span><span class="p">.</span><span class="n">hd</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+<div id="EdgesState">
+    <span class="c1">// <a name="EdgesState">EdgesState:</a></span>
+    <span class="c1">// Considering an edge, &#39;edge&#39;, in the search for the best path.</span>
+    <span class="kd">var</span> <span class="n">cost</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">edge</span><span class="p">.</span><span class="n">dest</span><span class="p">,</span>                      <span class="c1">// The edge destination</span>
+                      <span class="n">currentPath</span><span class="p">.</span><span class="n">cons</span><span class="p">(</span><span class="n">currentNode</span><span class="p">),</span>  <span class="c1">// The new currentPath</span>
+                      <span class="n">currentCost</span> <span class="o">+</span> <span class="n">edge</span><span class="p">.</span><span class="n">cost</span><span class="p">);</span>       <span class="c1">// The new currentCost</span></div>
+<div id="ContState">
+    <span class="c1">// <a name="ContState">ContState:</a></span>
+    <span class="c1">// A new path has been found (potentially). If it is better than our current</span>
+    <span class="c1">// best path &#39;bestResult&#39;, then replace &#39;bestResult&#39; with the new</span>
+    <span class="c1">// path.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">cost</span> <span class="o">&lt;</span> <span class="n">lowestCost</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">lowestCost</span> <span class="o">=</span> <span class="n">cost</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span></div>
+
+  <span class="c1">// Return the best cost we have found.</span>
+  <span class="k">return</span> <span class="n">lowestCost</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</body>
+</html>

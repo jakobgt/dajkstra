@@ -2,7 +2,7 @@
 *  This file is used to run the algorithms in the browser.
 */
 
-import 'dart:html' show query, CanvasElement, HTMLInputElement;
+import 'dart:html' hide Node;
 import 'dart:async';
 import 'dajkstra/dajkstra.dart';
 import 'graph-painter.dart';
@@ -25,12 +25,24 @@ void disableDijkstra() {
 
 void disableNaive() {
   query("#btn_naive_step").disabled = true;
+  query("#btn_naive_backstep").disabled = true;
   query("#btn_naive_run").disabled = true;
+}
+
+void updateCodeLocation(String loc) {
+  print("Updating location to $loc");
+  IFrameElement base = (query("#code") as IFrameElement);
+  base.src = "naive-simple.html#$loc";
+}
+
+num getRunSpeed() {
+  Element elm = query("#inp_run_speed");
+  return (elm == null) ? runSpeed : int.parse(elm.value, onError: (_) => runSpeed);
 }
 
 void main() {
   print("Running main");
-  var buttons = ["#btn_reset", "#btn_easy_map", "#btn_hard_map", "#btn_naive_step",
+  var buttons = ["#btn_reset", "#btn_easy_map", "#btn_hard_map", "#btn_naive_step", "#btn_naive_backstep",
                  "#btn_naive_run", "#btn_dijkstra_step", "#btn_dijkstra_run"];
   buttons = new List.from(buttons.map((String s) => query(s)));
   print(buttons);
@@ -41,20 +53,27 @@ void main() {
   ShortestPathDriver resetGraph(int graphComplexity) {
     timer.cancel();
     enableAllButtons();
-    return new ShortestPathDriver(query("#map"), nodeCount,
+    var driver = new ShortestPathDriver(query("#map"), nodeCount,
         xmax, ymax, mapWidthMax, mapHeightMax)..generateGraph(graphComplexity);
+    driver.onNaiveStateChange.listen((String stateName) => updateCodeLocation(stateName));
+    return driver;
   }
   var driver = resetGraph(easyGraph);
   // Setting up buttons.
   query("#btn_reset").onClick.listen((e) {
     enableAllButtons();
     driver.resetPath();
+    updateCodeLocation("");
   });
   query("#btn_easy_map").onClick.listen((e) {driver = resetGraph(easyGraph); });
   query("#btn_hard_map").onClick.listen((e) {driver = resetGraph(hardGraph); });
   query("#btn_naive_step").onClick.listen((e) {
     disableDijkstra();
     driver.takeNaiveStep();
+  });
+  query("#btn_naive_backstep").onClick.listen((e) {
+    disableDijkstra();
+    driver.takeNaiveBackStep();
   });
   bool runningNaive = false;
   query("#btn_naive_run").onClick.listen((e) {
@@ -66,7 +85,7 @@ void main() {
       button.value = "Run Naive";
       runningNaive = false;
     } else {
-      timer = driver.runNaive(driver.takeNaiveStep, runSpeed);
+      timer = driver.runNaive(driver.takeNaiveStep, getRunSpeed());
       button.value = "Stop naive run";
       runningNaive = true;
     }
@@ -87,7 +106,7 @@ void main() {
       runningDijkstra = false;
     } else {
       //Dijkstras should run a little slower, because it does not have as many steps.
-      timer = driver.runNaive(driver.takeDijkstraStep, 2* runSpeed);
+      timer = driver.runNaive(driver.takeDijkstraStep, 2* getRunSpeed());
       button.value = "Stop Dijkstra run";
       runningDijkstra = true;
     }
@@ -106,12 +125,23 @@ class ShortestPathDriver {
   GraphPainter _graphPainter;
 
   DisplayableGraph _graph;
-  State _state;
+  List<State> _state = new List();
   Timer _timer = new Timer(new Duration(seconds: 0), () {}); //Default timer to avoid null
 
+  StreamController<String> _naiveStateChangeController;
+  Stream<String> onNaiveStateChange;
   ShortestPathDriver(CanvasElement canvasElement, this._nodeCount, this._xmax, this._ymax,
                      mapWidthMax, mapHeightMax) {
     _graphPainter = new GraphPainter(canvasElement, _xmax, _ymax, mapWidthMax, mapHeightMax);
+    resetStreamController();
+  }
+
+  void resetStreamController() {
+    if (_naiveStateChangeController != null) {
+      _naiveStateChangeController.close();
+    }
+    _naiveStateChangeController = new StreamController();
+    onNaiveStateChange = _naiveStateChangeController.stream;
   }
 
   void generateGraph(num numberOfRoutes) {
@@ -128,7 +158,7 @@ class ShortestPathDriver {
   }
 
   void resetPath() {
-    _state = null;
+    _state.clear();
     _timer.cancel();
     _graphPainter.drawGraph(_graph);
     _dijkstraAlgorithm = new DijkstraAlgorithm(_graph.graph);
@@ -216,48 +246,63 @@ class ShortestPathDriver {
   // Takes a step and repaint the graph with the given path.
   // It returns true, when there are no more steps to take.
   bool takeNaiveStep() {
-    if (_state == null) _state = new NaiveAutomaton().startStepping(_graph.graph);
-    _state = _state.step();
+    if (_state.isEmpty) _state.add(new NaiveAutomaton().startStepping(_graph.graph));
+    _state.add(_state.last.step());
+    _repaintNaive(_state.last);
+    return (_state.last is FinalState);
+  }
+
+  // Takes a back step and repaints the graph with the given path.
+  // Returns true if no back step is possible
+  bool takeNaiveBackStep() {
+    if (_state.length < 2) return true;
+    // This popped is currently shown.
+    _state.removeLast();
+    _repaintNaive(_state.last);
+    return false;
+  }
+
+  void _repaintNaive(State state) {
     dynamic idFun(dynamic x) => x;
-    // If we have a EdgesState we continue;
-    _state = _state.match(onEdges: (state) => _state.step(), onCycle: idFun, onPath: idFun, onFinal: idFun,
-                          onNode: idFun, onCont: idFun);
+//    // If we have a EdgesState we continue, we could continue.
+//    _state = _state.match(onEdges: (state) => _state.step(), onCycle: idFun, onPath: idFun, onFinal: idFun,
+//                          onNode: idFun, onCont: idFun);
     PList<Node> currentPath = new PList();
     PList<Node> cycle = new PList();
     PList<Node> endPath = new PList();
     Context context = new EmptyContext();
     Map<Node, num> nodeCosts = new Map();
-    _state.match(
+    state.match(
         onCycle: (state) {
-                   context = state.cont.cont;
-                   currentPath = state.cyclePath;
-                   cycle = _extractCycle(currentPath);
-                 },
+          context = state.cont.cont;
+          currentPath = state.cyclePath;
+          cycle = _extractCycle(currentPath);
+        },
         onPath: (state) {
-                   context = state.cont.cont;
-                   Result result = state.cont.result;
-                   currentPath = result.path;
-                   nodeCosts[result.path.hd] = result.cost;
-                   endPath = currentPath;
-                 },
+          context = state.cont.cont;
+          Result result = state.cont.result;
+          currentPath = result.path;
+          nodeCosts[result.path.hd] = result.cost;
+          endPath = currentPath;
+        },
         onFinal: (state) {
-                   Result result = state.result;
-                   currentPath = result.path;
-                   nodeCosts[_graph.graph.end] = result.cost;
-                   endPath = currentPath;
-                 },
+          Result result = state.result;
+          currentPath = result.path;
+          nodeCosts[_graph.graph.end] = result.cost;
+          endPath = currentPath;
+        },
         onNode: (state) {
-                   context = state.cont;
-                   currentPath = state.currentPath.cons(state.currentNode);
-                 },
+          context = state.cont;
+          currentPath = state.currentPath.cons(state.currentNode);
+        },
         onEdges: (state) {
-                   context = state.cont;
-                   currentPath = state.currentFullPath;
-                 },
+          context = state.cont;
+          currentPath = state.currentFullPath;
+        },
         onCont: (state) {
-                   context = state.cont;
-                   currentPath = _extractPath(state.cont);
-                 }
+          context = state.cont;
+          currentPath = _extractPath(state.cont);
+        }
     );
     PList<Edge> todoEdges = flatten(_extractEdgesToDo(context));
 
@@ -266,17 +311,21 @@ class ShortestPathDriver {
     }, []);
 
     _graphPainter.drawPath(_graph,
-        edgeColorFn: (Node src, Node dst) =>
-        (visit(cycle, src, dst))
-          ? "red" : (visit(endPath, src, dst))
-            ? "green" : (visit(currentPath, src, dst))
-              ? "blue" : (visitEdges(todoEdges, src, dst))
-                ? "lightblue" : "gray",
-        nodeColorFn: (Node n) =>
-          (currentPath.any((Node other) => n.id == other.id))? "white": "gray",
-        nodeTextFn: (Node n) => nodeCosts.containsKey(n) ? "${(nodeCosts[n]*10).floor()/10}" : "");
-    print(currentPath);
-    return (_state is FinalState);
+    edgeColorFn: (Node src, Node dst) =>
+    (visit(cycle, src, dst))
+      ? "red" : (visit(endPath, src, dst))
+        ? "green" : (visit(currentPath, src, dst))
+          ? "blue" : (visitEdges(todoEdges, src, dst))
+            ? "lightblue" : "gray",
+    nodeColorFn: (Node n) =>
+        (currentPath.any((Node other) => n.id == other.id))? "white": "gray",
+    nodeTextFn: (Node n) => nodeCosts.containsKey(n) ? "${(nodeCosts[n]*10).floor()/10}" : "");
+          print(currentPath);
+    String newStateName = state.match(onEdges: (_) => "EdgesState", onCycle: (_) => "CycleState",
+                                      onPath: (_) => "PathState", onFinal: (_) => "FinalState",
+                                      onNode: (_) => "NodeState", onCont: (_) => "ContState");
+
+    _naiveStateChangeController.add(newStateName);
   }
 
 }
